@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, jsonify
 from datetime import datetime, timedelta
-from db import get_dataframe_from_db, get_all_tables_from_db, filter_by_time
-from map import create_markers
+from .db import get_dataframe_from_db, get_all_tables_from_db, filter_by_time
+from .map import create_markers
 
 app = Flask(__name__)
 
