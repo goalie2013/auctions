@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, redirect
 from datetime import datetime, timedelta
 from .db import get_dataframe_from_db, get_all_tables_from_db, filter_by_time
 from .map import create_markers
@@ -8,7 +8,8 @@ app = Flask(__name__)
 
 @app.get('/')
 def index():
-    return render_template('index.html')
+    # return render_template('index.html')
+    return redirect('/map')
 
 @app.post('/')
 def make_markers():
