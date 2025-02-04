@@ -1,0 +1,1 @@
+csv_dict = {'CA_KERN_Auctions.csv': 'ca_kern'}

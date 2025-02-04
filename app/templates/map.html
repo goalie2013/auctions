@@ -1,0 +1,222 @@
+{# templates/map.html #}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Map with Markers</title>
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+    <link href="https://api.mapbox.com/mapbox-gl-js/v3.2.0/mapbox-gl.css" rel="stylesheet">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v3.2.0/mapbox-gl.js"></script>
+    <style>
+        #map { 
+            height: 100vh; 
+            width: 100%; 
+            z-index: 1;
+            position: relative;  /* Add this */
+            pointer-events: auto !important;  /* Add this */
+        }
+        
+        .filter-box {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: rgb(240, 240, 240);
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            z-index: 10;
+            pointer-events: auto;  /* Add this */
+        }
+       
+        .mapboxgl-marker {
+            z-index: 1000;
+        }
+        .mapboxgl-popup {
+            z-index: 2000;  /* Higher than markers */
+            pointer-events: auto !important;
+        }
+        .mapboxgl-popup-content {
+            padding: 15px;
+            max-width: 300px;  /* or whatever width you prefer */
+        }
+        /* Make sure popup stays above other elements */
+        .mapboxgl-popup-anchor-bottom {
+            z-index: 2000;
+        }
+
+        .mapboxgl-control-container .mapboxgl-ctrl-top-left {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;  /* Adds space between controls */
+            margin: 10px;  /* Adds margin from the edge */
+            z-index: 2000;
+        }
+        /* Ensure the canvas element receives events */
+        .mapboxgl-canvas {
+            pointer-events: all !important;
+        }
+
+        .header-row {
+            display: flex;
+            align-items: center;  /* vertically centers items */
+            gap: 10px;  /* space between image and text */
+        }
+        .filter-image {
+            width: 20px;  /* or specific width */
+            height: 20px;  /* maintains aspect ratio */
+            margin-bottom: 5px;  /* space between image and title */
+        }
+       
+    </style>
+</head>
+<body style="pointer-events: auto;">
+    <div id='map'></div>
+    <div class="filter-box">
+        <h3>Filter</h3>
+        <label for="price">Min Bid Price:</label>
+        <input type="number" id="price" name="price">
+        <br><br>
+        <label for="date">Date:</label>
+        <input type="date" id="date" name="date">
+        <br><br>
+        <button onclick="applyFilters()">Apply Filters</button>
+        <br />
+        <h3>Key</h3>
+        <div class="header-row">
+            <img src="../static/green_marker.jpeg" class="filter-image" />
+            <h4>Less than $15,000</h4>
+        </div>
+        <div class="header-row">
+            <img src="../static/blue_marker.png" class="filter-image" />
+            <h4>$15,000 - $50,000</h4>
+        </div>
+        <div class="header-row"><img src="../static/red_marker.png" class="filter-image" />
+            <h4>Greater than $50,000</h4>
+        </div>
+    </div>
+
+    {% block javascript %}
+    <script>
+        console.log('SCRIPPPTT');
+        // Initialize Mapbox map
+        mapboxgl.accessToken = 'pk.eyJ1IjoiZ2FiZ3JpbjkwIiwiYSI6ImNtNnF0dTRtMTBmbTMybW9ycjd4Y3J4OTgifQ.AWHqDZ_95zhFPhW4jXRtwA';
+        
+        const map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/streets-v11',
+            center: [-118, 35], // Default center
+            zoom: 7, // Default zoom
+            interactive: true
+        });
+        
+        // Add this after map initialization
+        map.on('load', () => {
+            map.addControl(new mapboxgl.NavigationControl(), 'top-left');
+            // Explicitly enable all interactions
+            map.dragPan.enable();
+            map.dragRotate.enable();
+            map.scrollZoom.enable();
+            map.touchZoomRotate.enable();
+        });
+
+        // Add markers to the map
+        let marker_lst = []
+        let markerData = {{ marker_data | tojson | safe }}
+        console.log('markerData', markerData)
+
+        load_markers(markerData)
+
+        // Function to apply filters
+        async function applyFilters() {
+            console.log('applyFilters running...')
+            let price = document.getElementById('price').value;
+            let date = document.getElementById('date').value;
+
+            if (price === "" || isNaN(price)) price = '0'
+            console.log('price', typeof(price), price)
+            
+            console.log('date', typeof (date), date)
+
+            // Make an async GET request to Flask endpoint
+            try {
+                const response = await fetch(`../map/filters?price=${price}&date=${date}`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Filtered data:', data);
+                    // Update map based on filtered data
+                    // Implement logic to update markers
+
+                    for (var i = marker_lst.length - 1; i >= 0; i--) {
+                        marker_lst[i].remove();
+                    }
+                    
+                    console.log('markerData', data)
+
+                    load_markers(data)
+
+                } else {
+                    console.error('Failed to apply filters:', response.statusText);
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+
+        function load_markers(markerData) {
+            console.log('Loading markers...');
+
+            markerData.forEach((marker) => {
+                let el = document.createElement('div');
+                el.className = 'marker';
+
+                // Customize marker based on price
+                if (marker.price > 10000) {
+                    el.style.backgroundColor = 'red';
+                } else {
+                    el.style.backgroundColor = 'blue';
+                }
+
+                // Create popup first
+                const popup = new mapboxgl.Popup({
+                    offset: [0, -60], // Offset from the marker
+                    closeButton: true,
+                    closeOnClick: true,
+                    anchor: 'bottom'
+                }).setHTML(
+                    `<h2>${marker.address}</h2>
+                    <h3>${marker.county}, ${marker.state}</h3>
+                    <h3>Min Bid: $${marker.price}</h3>
+                    <a href="https://www.eppraisal.com/property/?address1=${marker.address2}&address2=${marker.zipcode}" 
+                    target="_blank">Link to Property Estimate</a>`
+                );
+
+                let m = new mapboxgl.Marker({
+                    color: (marker.price > 50000 ? 'red' : marker.price > 15000 ? 'blue': 'green'),
+                    anchor: 'bottom',
+                    draggable: false,
+                })
+                    .setLngLat([marker.lon, marker.lat])
+                    .setPopup(popup)
+                    .addTo(map);
+                
+                console.log('m: ', m);
+
+                // Add click event to marker
+                m.getElement().addEventListener('click', () => {
+                    popup.addTo(map);
+                });
+
+                marker_lst.push(m)
+
+            });
+
+        }
+
+        
+    </script>
+    {% endblock %}
+
+</body>
+</html>
