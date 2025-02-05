@@ -1,0 +1,152 @@
+#map {
+    height: 100vh;
+    width: 100vw;
+    z-index: 1;
+    position: relative;
+    /* Add this */
+    pointer-events: auto !important;
+    /* Add this */
+}
+
+.filter-handle {
+    display: none;
+    /* Hidden on desktop */
+}
+
+.filter-box {
+    position: absolute;
+    height: auto;
+    width: auto;
+    top: 5px;
+    right: 2px;
+    padding: 5px;
+    background-color: rgb(240, 240, 240);
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    z-index: 10;
+    pointer-events: auto;
+    /* Add this */
+}
+
+.show-filters-btn {
+    display: none;
+    /* Hidden by default */
+}
+
+/* Tablet screens */
+@media screen and (max-width: 768px) {
+    .filter-box {
+        position: fixed;
+        top: auto;
+        bottom: 0;
+        right: 0;
+        left: 0;
+        width: 100%;
+        border-radius: 20px 20px 0 0;
+        padding: 15px;
+        transform: translateY(100%);
+        /* Start fully off screen */
+        transition: transform 0.3s ease;
+    }
+    .filter-box.expanded {
+        transform: translateY(0);
+        /* Fully expanded */
+    }
+    .filter-handle {
+        display: block;
+        height: 50px;
+        width: 100%;
+        padding: 15px 0;
+        cursor: pointer;
+        text-align: center;
+    }
+
+    .handle-bar {
+        width: 40px;
+        height: 5px;
+        background-color: #ccc;
+        border-radius: 3px;
+        margin: 0 auto;
+    }
+
+    .show-filters-btn {
+        display: block;
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background-color: #4CAF50;
+        color: white;
+        padding: 12px 24px;
+        border-radius: 25px;
+        border: none;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        z-index: 9;
+        cursor: pointer;
+    }
+}
+
+.filter-button {
+    background-color: #8fbdff;
+    /* or any color you prefer */
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.filter-image {
+    width: 20px;
+    /* or specific width */
+    height: 20px;
+    /* maintains aspect ratio */
+    margin-bottom: 5px;
+    /* space between image and title */
+}
+
+.mapboxgl-marker {
+    z-index: 1000;
+}
+
+.mapboxgl-popup {
+    z-index: 2000;
+    /* Higher than markers */
+    pointer-events: auto !important;
+}
+
+.mapboxgl-popup-content {
+    padding: 15px;
+    max-width: 300px;
+    /* or whatever width you prefer */
+}
+
+/* Make sure popup stays above other elements */
+.mapboxgl-popup-anchor-bottom {
+    z-index: 2000;
+}
+
+.mapboxgl-control-container .mapboxgl-ctrl-top-left {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    /* Adds space between controls */
+    margin: 10px;
+    /* Adds margin from the edge */
+    z-index: 2000;
+}
+
+/* Ensure the canvas element receives events */
+.mapboxgl-canvas {
+    pointer-events: all !important;
+}
+
+.header-row {
+    display: flex;
+    align-items: center;
+    /* vertically centers items */
+    gap: 10px;
+    /* space between image and text */
+}

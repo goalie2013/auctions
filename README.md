@@ -1,4 +1,4 @@
-Housing Auctions
+Real Estate Auction Data & Mapping
 
 This is a sample that got me on a project at a real estate company. I cannot show all of my work because of what was used for the proprietary software, but this is a rough draft of what I made initially.
 
